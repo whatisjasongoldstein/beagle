@@ -55,7 +55,7 @@ Fill your index with functions that manage the build process.
 # will run as part of the build process, and should
 # return at least one Beagle command (you can put them in a list)
 from beagle.decorators import action
-from beagle.commands import Page, Copy
+from beagle.commands import Page, Copy, Sass, Concat
 
 @action
 def homepage():
@@ -88,6 +88,16 @@ def css():
     and outputs into the dist folder.
     """
     return Sass(file="css/app.scss", output="css/app.min.css")
+
+
+@action
+def js():
+    """
+    Rollup javascript into one file using the concat command.
+    """
+    return Contact(
+        filenames=["jquery.js", "underscore.js", "helpers.js"],
+        destination="app.min.js")
 
 ```
 

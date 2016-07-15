@@ -68,3 +68,13 @@ class Sass(Command):
         sass_input = os.path.join(self.app.src, self.file)
         sass_output = os.path.join(self.app.dist, self.output)
         subprocess.call("sassc --sourcemap %s %s" % (sass_input, sass_output), shell=True)
+
+
+class Concat(Command):
+    requires = ["filenames", "destination"]
+
+    def render(self):
+        files = " ".join([os.path.join(self.app.src, f) for f in self.filenames])
+        dest = os.path.join(self.app.dist, self.destination)
+        subprocess.call("cat %s > %s" % (files, dest), shell=True)
+
