@@ -43,11 +43,23 @@ class Page(Command):
             f.write(html)
 
 
-class CopyDir(Command):
-    requires = ["directory", "output"]
+class Copy(Command):
+    """
+    Copy anything into dist. infile is required.
+    outfile will be the same if left blank.
+    """
+    requires = ["infile"]
     
     def render(self):
-        shutil.copy(self.directory, self.output)
+        if not hasattr(self, "outfile"):
+            self.outfile = self.infile
+        infile = os.path.join(self.app.src, self.infile)
+        outfile = os.path.join(self.app.dist, self.outfile)
+
+        if os.path.isdir(infile):
+            shutil.copytree(infile, outfile)
+        else:
+            shutil.copy(infile, outfile)
 
 
 class Sass(Command):
