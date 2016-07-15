@@ -18,6 +18,9 @@ A build tool for static sites. You create a simple skeleton like this:
 myproject/
     app.py
     dist/
+        # This should be empty.
+        # It will be wiped/built up
+        # on each build.
     src/
         index.py
 
@@ -38,6 +41,8 @@ import beagle
 
 from src import index
 
+# In theory these can live wherever you want, but you
+# should keep them inside the repo.
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(PROJECT_DIR, "src")
 DIST_DIR = os.path.join(PROJECT_DIR, "dist")
@@ -104,6 +109,7 @@ def js():
 If `watch` is true, every time you modify a file in the source
 directory, include the index, the dist will rebuild.
 
+
 ### Extensibility
 
 Subclass `beagle.commands.Command` to make new commands.
@@ -137,15 +143,16 @@ def browserify():
 Because everything here is just Python, there's no reason you can't make, for example,
 database calls in your index or custom commands.
 
-
 ## Deployment
 
 Point nginx at your `dist` folder.
 
 I have some ideas about github pages but haven't tested them yet.
 
-Never expose your Python code to the outside world. That would be bad.
+I bet you could even write a command that rsync'd the dist folder
+to a remote server, and not even need to have your repo live on the box.
 
+As you know, never expose your Python code to the outside world.
 
 ### I still don't get why this is a thing
 
