@@ -1,6 +1,5 @@
 import shutil
 import json
-import subprocess
 import os
 import sys
 import time
@@ -20,65 +19,6 @@ if is_dev:
         pass
 
 
-class Command(object):
-
-    app = None
-    requires = []
-
-    def __init__(self, **kwargs):
-        
-        # Ensure that all required kwargs are present
-        for key in self.requires:
-            if key not in kwargs:
-                raise Exception("Required kwarg missing: %s" % key)
-
-        # Set all kwargs on the class
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    def set_app(self, app):
-        self.app = app
-
-    def render(self):
-        raise Exception("You need to implement a render method.")
-
-
-class Page(Command):
-    """
-    A templating object.
-    """
-    requires = ("template", "context", "output", )
-
-    def render(self):
-        template = self.app.jinja.get_template(self.template)
-        html = template.render(**self.context)
-        with open(os.path.join(self.app.dist, self.output), "w") as f:
-            f.write(html)
-
-
-class CopyDir(Command):
-    requires = ["directory", "output"]
-    
-    def render(self):
-        shutil.copy(self.directory, self.output)
-
-
-class Sass(Command):
-
-    def render(self):
-        sass_input = os.path.join(self.app.src, self.file)
-        sass_output = os.path.join(self.app.dist, self.output)
-        subprocess.call("sassc --sourcemap %s %s" % (sass_input, sass_output), shell=True)
-
-
-def action(func):
-    """
-    Any function that should run as part of the 
-    build process.
-    """
-    func._is_beagle_action = True
-    return func
-
 server = None
 if is_dev:
 
@@ -97,7 +37,7 @@ if is_dev:
         return server.send_static_file(path)
 
 
-class Engine(object):
+class App(object):
 
     def __init__(self, index, src=None, dist=None):
         self.index = index
@@ -141,9 +81,6 @@ class Engine(object):
             except FileExistsError:
                 pass
 
-        with open(os.path.join(self.src, "index.json"), "r") as f:
-            project_index = json.load(f)
-
         importlib.reload(self.index)
 
         keys = dir(self.index)
@@ -154,9 +91,6 @@ class Engine(object):
             if hasattr(attr, "_is_beagle_action"):
                 self.do_action(attr)
 
-        # js_input = os.path.join(PROJECT_DIR, "static/js/app.js")
-        # js_output = os.path.join(PROJECT_DIR, "static/js/app.min.js")
-        # subprocess.call("browserify %s -t [ babelify --presets [ es2015 ] ] --output %s" % (js_input, js_output), shell=True)
         self.notify("Built your code! 🐶")
 
     def notify(self, message):
