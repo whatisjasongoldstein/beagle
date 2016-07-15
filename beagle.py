@@ -16,7 +16,19 @@ except ImportError:
     Notifier = None
 
 
-class Page(object):
+class BaseAction(object):
+    def __init__(*kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def set_engine(self, engine):
+        self.engine = engine
+
+    def render(self):
+        pass
+
+
+class Page(BaseAction):
     """
     A templating object.
     """
@@ -24,6 +36,20 @@ class Page(object):
         self.output = output
         self.template = template
         self.context = context
+
+
+
+    def render(self, engine):
+        template = engine.jinja.get_template(self.template)
+        html = template.render(**self.context)
+        with open(os.path.join(engine.dist, self.output), "w") as f:
+            f.write(html)
+
+
+class Sass(BaseAction):
+
+    def render(self):
+        pass
 
 
 def action(func):
@@ -34,13 +60,16 @@ def action(func):
     func._is_beagle_action = True
     return func
 
+
 # Setup Flask app, which will be our dev server
 from flask import Flask
 app = Flask(__name__, static_folder="dist")
 
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
+
 
 @app.route('/<path:path>')
 def everything_else(path):
@@ -58,8 +87,21 @@ class Engine(object):
         # Set flask to serve from the right directory
         app.static_folder = self.dist
 
+        self.jinja = Environment(loader=FileSystemLoader(self.src))
+
+    def do_action(self, action):
+        assets = action()
+
+        # Assets are always a list
+        if not hasattr(assets, "__iter__"):
+            assets = (assets, )
+
+        for asset in assets:
+            asset.set_engine(self)
+            asset.render(self)
+
+
     def render(self):
-        importlib.reload(self.index)
     
         # Cleanup dist and ensure folders exist
         shutil.rmtree(self.dist)
@@ -77,12 +119,15 @@ class Engine(object):
         with open(os.path.join(self.src, "index.json"), "r") as f:
             project_index = json.load(f)
 
-        env = Environment(loader=FileSystemLoader(self.src))
-        for page in project_index["pages"]:
-            template = env.get_template(page["template"])
-            html = template.render(**page.get("context", {}))
-            with open(os.path.join(self.dist, page["output"]), "w") as f:
-                f.write(html)
+        importlib.reload(self.index)
+
+        keys = dir(self.index)
+        for key in keys:
+            if key.startswith("__"):
+                continue
+            attr = getattr(self.index, key, None)
+            if hasattr(attr, "_is_beagle_action"):
+                self.do_action(attr)
 
         for sass in project_index.get("sass", []):
             sass_input = os.path.join(self.src, sass["file"])
@@ -104,7 +149,7 @@ class Engine(object):
         
         render = self.render
 
-        class AssetMaker(FileSystemEventHandler):
+        class RenderOnChangeHandler(FileSystemEventHandler):
             """
             Restart and when anything in src changes.
             """
@@ -117,7 +162,7 @@ class Engine(object):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s - %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        event_handler = AssetMaker()
+        event_handler = RenderOnChangeHandler()
         observer = Observer()
 
         observer.schedule(event_handler, self.src, recursive=True)
