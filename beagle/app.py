@@ -135,7 +135,6 @@ class App(object):
 
         # Setup Flask app, which will be our dev server
         from flask import Flask
-        from werkzeug.wsgi import DispatcherMiddleware
 
         server = Flask(__name__, static_folder="dist")
         server.static_folder = self.dist
