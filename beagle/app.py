@@ -6,6 +6,7 @@ import time
 import logging
 import importlib
 import jinja2
+from werkzeug.exceptions import NotFound
 import markdown
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler
@@ -63,16 +64,8 @@ class App(object):
         if "--clean" in sys.argv:
             shutil.rmtree(self.dist)
 
-        required_folders = (
-            self.dist,
-            os.path.join(self.dist, "css"),
-            os.path.join(self.dist, "js"),
-        )
-        for folder in required_folders:
-            try:
-                os.mkdir(folder)
-            except FileExistsError:
-                pass
+        if not os.path.exists(self.dist):
+            os.mkdir(self.dist)
 
         importlib.reload(self.index)
 
@@ -108,8 +101,18 @@ class App(object):
 
         @server.route('/<path:path>')
         def everything_else(path):
-            # send_static_file will guess the correct MIME type
-            return server.send_static_file(path)
+
+            # urls that end with a / are prolem index-wrapping
+            if path.endswith("/"):
+                path = "%sindex.html" % path
+
+            try:
+                # send_static_file will guess the correct MIME type
+                return server.send_static_file(path)
+            except NotFound:
+                # If the file doesn't exist, assume it should
+                # be an html file.
+                return server.send_static_file("%s.html" % path)
 
         render = self.render
 

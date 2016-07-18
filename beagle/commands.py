@@ -2,6 +2,8 @@ import os
 import shutil
 import subprocess
 
+from .helpers import require_directory
+
 
 class Command(object):
     """
@@ -37,9 +39,16 @@ class Page(Command):
     requires = ("template", "context", "output", )
 
     def render(self):
+        # Ensure the output directory exists
+        outfile = os.path.join(self.app.dist, self.output)
+        require_directory(outfile)
+
+        # Render the template in jinja2
         template = self.app.jinja.get_template(self.template)
         html = template.render(**self.context)
-        with open(os.path.join(self.app.dist, self.output), "w") as f:
+
+        # Write the file
+        with open(outfile, "w") as f:
             f.write(html)
 
 
@@ -67,6 +76,7 @@ class Sass(Command):
     def render(self):
         sass_input = os.path.join(self.app.src, self.file)
         sass_output = os.path.join(self.app.dist, self.output)
+        require_directory(sass_output)
         subprocess.call("sassc --sourcemap %s %s" % (sass_input, sass_output), shell=True)
 
 
@@ -76,5 +86,6 @@ class Concat(Command):
     def render(self):
         files = " ".join([os.path.join(self.app.src, f) for f in self.filenames])
         dest = os.path.join(self.app.dist, self.destination)
+        require_directory(dest)
         subprocess.call("cat %s > %s" % (files, dest), shell=True)
 
