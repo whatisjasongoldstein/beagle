@@ -7,4 +7,7 @@ def require_directory(path):
     """
     outdir = os.path.dirname(path)
     if not os.path.exists(outdir):
-        os.makedirs(outdir)
+        try:
+            os.makedirs(outdir)
+        except FileExistsError:
+            pass

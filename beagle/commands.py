@@ -65,6 +65,10 @@ class Copy(Command):
         infile = os.path.join(self.app.src, self.infile)
         outfile = os.path.join(self.app.dist, self.outfile)
 
+        # replace existing directories
+        if os.path.exists(outfile) and os.path.isdir(outfile):
+            shutil.rmtree(outfile)
+
         if os.path.isdir(infile):
             shutil.copytree(infile, outfile)
         else:

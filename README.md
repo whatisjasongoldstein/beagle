@@ -185,6 +185,24 @@ to a remote server, and not even need to have your repo live on the box.
 
 As you know, never expose your Python code to the outside world.
 
+### Github pages
+
+To deploy to Github pages, set up dist to write to the repo's gh-pages
+branch, and add the dist folder to your `.gitignore` file.
+
+Github pages are weird, because they serve out of yourname.github.io/reponame/,
+meaning the base url is on a path.
+
+To tell the development server to behave the same way, you can pass `url_prefix`
+as a kwarg to the Beagle app.
+
+```python
+app = beagle.App(index, src=SRC_DIR, dist=DIST_DIR, watch=True, url_prefix="/reponame/")
+```
+
+You'll need to code all the links/assets in your source directory to start with `/reponame/`,
+and the Flask development server will serve `dist` to that url.
+
 ## I still don't get why this is a thing
 
 I noticed that most of the tools that I struggled to make

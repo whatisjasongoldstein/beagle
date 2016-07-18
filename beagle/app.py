@@ -20,12 +20,30 @@ except ImportError:
 
 
 class App(object):
-
-    def __init__(self, index, src=None, dist=None, watch=False, jinja_env=None):
+    """
+    index
+      - Python module that contains @action functions, which are executed
+        to build the site
+    src
+      - Absolute path to the site's source directory
+    dist
+      - Absolute path to the site's build directory
+    watch
+      - Boolean. Should we start a Flask server and autobuild for development?
+    jinja_env
+      - Custom jinja2 environment for... special cases I haven't thought of?
+    url_prefix
+      - Used when the site will live under a path, such as mysite.com/foo/ instead
+        of simply mysite.com. This is meant to help work on github pages, and
+        will make the development server behave as expected.
+    """
+    def __init__(self, index, src=None, dist=None, watch=False, jinja_env=None, url_prefix="/"):
         self.index = index
         self.src = src
         self.dist = dist
 
+        # Set url prefix for developing github pages
+        self.url_prefix = url_prefix
 
         # Allow passing a custom jinja2 env
         if jinja_env:
@@ -67,11 +85,28 @@ class App(object):
             asset.render()
 
 
+    def clean(self):
+        """
+        Since dist can be a separate repo or symlink, we
+        can't just drop the whole folder, only its contents.
+        """
+        for filename in os.listdir(self.dist):
+
+            # Don't delete hidden files
+            if filename.startswith("."):
+                continue
+
+            filepath = os.path.join(self.dist, filename)
+            if os.path.isdir(filepath):
+                shutil.rmtree(filepath)
+            else:
+                os.remove(filepath)
+
     def render(self):
     
         # Cleanup dist and ensure folders exist if --clean
         if "--clean" in sys.argv:
-            shutil.rmtree(self.dist)
+            self.clean()
 
         if not os.path.exists(self.dist):
             os.mkdir(self.dist)
@@ -100,15 +135,16 @@ class App(object):
 
         # Setup Flask app, which will be our dev server
         from flask import Flask
+        from werkzeug.wsgi import DispatcherMiddleware
+
         server = Flask(__name__, static_folder="dist")
         server.static_folder = self.dist
 
-        @server.route('/')
+        @server.route(self.url_prefix)
         def index():
             return server.send_static_file('index.html')
 
-
-        @server.route('/<path:path>')
+        @server.route('%s<path:path>' % self.url_prefix)
         def everything_else(path):
 
             # urls that end with a / are prolem index-wrapping
