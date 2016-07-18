@@ -35,7 +35,7 @@ all this stuff.
 
 `app.py` instantiates the app, and should look like this:
 
-```
+```python
 #!/usr/bin/env python
 
 import os
