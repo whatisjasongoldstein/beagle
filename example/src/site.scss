@@ -1,0 +1,19 @@
+$textcolor: #111;
+$bgcolor: #eff;
+
+body {
+    text-align: center;
+    font-size: 2rem;
+    font-family: "Helvetica", calbre, arial, sans-serif;
+    background: $bgcolor;
+    color: $textcolor;
+}
+
+h1 {
+    &:before {
+        content: "<"
+    }
+    &:after {
+        content: ">"
+    }
+}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% filter markdown %}
+    {% include doc %}
+{% endfilter %}
+{% endblock %}

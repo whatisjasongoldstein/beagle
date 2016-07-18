@@ -1,0 +1,1 @@
+console.log("This js doesn't do much. I should make a babel or react example.")
