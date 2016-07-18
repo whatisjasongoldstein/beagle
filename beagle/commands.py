@@ -36,11 +36,11 @@ class Page(Command):
     """
     A templating object.
     """
-    requires = ("template", "context", "output", )
+    requires = ("template", "context", "outfile", )
 
     def render(self):
         # Ensure the output directory exists
-        outfile = os.path.join(self.app.dist, self.output)
+        outfile = os.path.join(self.app.dist, self.outfile)
         require_directory(outfile)
 
         # Render the template in jinja2
@@ -73,19 +73,21 @@ class Copy(Command):
 
 class Sass(Command):
 
+    requires = ["infile", "outfile"]
+
     def render(self):
-        sass_input = os.path.join(self.app.src, self.file)
-        sass_output = os.path.join(self.app.dist, self.output)
+        sass_input = os.path.join(self.app.src, self.infile)
+        sass_output = os.path.join(self.app.dist, self.outfile)
         require_directory(sass_output)
         subprocess.call("sassc --sourcemap %s %s" % (sass_input, sass_output), shell=True)
 
 
 class Concat(Command):
-    requires = ["filenames", "destination"]
+    requires = ["infiles", "outfile"]
 
     def render(self):
-        files = " ".join([os.path.join(self.app.src, f) for f in self.filenames])
-        dest = os.path.join(self.app.dist, self.destination)
+        files = " ".join([os.path.join(self.app.src, f) for f in self.infiles])
+        dest = os.path.join(self.app.dist, self.outfile)
         require_directory(dest)
         subprocess.call("cat %s > %s" % (files, dest), shell=True)
 
