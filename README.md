@@ -6,13 +6,15 @@ with `extends`, `includes`, and logic, as well as builtin
 asset processing. 
 
 Can Gulp do this? Yes. But the gulp package ecosystem is terrible,
-debugging unpleasant, and I still have no idea what a `stream` is.
+debugging is unpleasant, and I still have no idea what a `stream` is.
 
-Python 3.
+Built in Python 3.
 
 ## Usage
 
-A build tool for static sites. You create a simple skeleton like this:
+`pip install git+git@github.com:whatisjasongoldstein/beagle.git@master#egg=beagle`
+
+Create a simple skeleton like this:
 
 ```
 myproject/
@@ -28,7 +30,8 @@ myproject/
 
 The source folder can contain jinja2 templates, stylesheets,
 images, javascript, fonts, or whatever other front end assets
-you need.
+you need, as well as Python files that dictate what to do with
+all this stuff.
 
 `app.py` instantiates the app, and should look like this:
 
@@ -76,14 +79,13 @@ def homepage():
 def include_images():
     """
     Copy will copy a file or directory into dist.
-    Since these are just python functions, you
-    can do anything you want in the logic.
+    Leaving the `outfile` option off will put it in
+    the same place.
     """
-    things = ["favicon.ico", "images"]
-    copies = []
-    for thing in things:
-        copies.append(Copy(infile="thing"))
-    return copies
+    return [
+        Copy(infile="favicon.ico"),
+        Copy(infiles="images/")
+    ]
 
 
 @action
@@ -92,7 +94,7 @@ def css():
     Takes SCSS, runs it through SASSC, 
     and outputs into the dist folder.
     """
-    return Sass(file="css/app.scss", output="css/app.min.css")
+    return Sass(infile="css/app.scss", outfile="css/app.min.css")
 
 
 @action
@@ -100,15 +102,23 @@ def js():
     """
     Rollup javascript into one file using the concat command.
     """
-    return Contact(
-        filenames=["jquery.js", "underscore.js", "helpers.js"],
-        destination="app.min.js")
+    return Concat(
+        infiles=["jquery.js", "underscore.js", "helpers.js"],
+        outfile="app.min.js")
 
 ```
 
 If `watch` is true, every time you modify a file in the source
 directory, include the index, the dist will rebuild.
 
+You'll notice these functions are just Python -- there's nothing
+stopping you from querying a sqlite database, pulling from an API,
+iterating over all the files in `os.path.dirname(os.path.abspath(__file__))`
+to do something special with all the markdown files in a given directory,
+or any other wizardry you can dream up in Python.
+
+None of this should require special knowledge outside of how to do 
+stuff in Python.
 
 ### Markdown
 
