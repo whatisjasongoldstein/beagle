@@ -167,8 +167,6 @@ class App(object):
             """
             def on_modified(self, *args, **kwargs):
                 render()
-                # python = sys.executable
-                # os.execl(python, python, *sys.argv)
         
         # Setup observer
         logging.basicConfig(level=logging.INFO,
@@ -181,7 +179,6 @@ class App(object):
         observer.start()
         try:
             # Run Simple python server
-            # run_server()
             server.run()
         except KeyboardInterrupt:
             observer.stop()
