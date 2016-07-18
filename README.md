@@ -11,11 +11,6 @@ Built in Python 3.
 
 I have no idea. I did it for fun, and to scratch my own itch.
 
-### Can't Gulp do this?
-
-It can. My goal here is to make an API and toolkit that I like using.
-And of course, to work in Python, which is really good at doing stuff to files.
-
 ## Usage
 
 `pip install git+git@github.com:whatisjasongoldstein/beagle.git@master#egg=beagle`
