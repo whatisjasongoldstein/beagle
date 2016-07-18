@@ -175,7 +175,7 @@ to a remote server, and not even need to have your repo live on the box.
 
 As you know, never expose your Python code to the outside world.
 
-### I still don't get why this is a thing
+## I still don't get why this is a thing
 
 I noticed that most of the tools that I struggled to make
 work to build a gulp static site had command lines. They don't need
