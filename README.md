@@ -125,7 +125,7 @@ stuff in Python.
 When rendering Jinja2 templates, you can use the Markdown
 filter. Almost all the extensions are enabled.
 
-```jinja2
+```html+jinja
 {{ title|markdown }}
 
 {% filter markdown %}
