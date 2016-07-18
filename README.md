@@ -5,10 +5,16 @@ fit into Jekyll's mold, and you want a real template language
 with `extends`, `includes`, and logic, as well as builtin
 asset processing. 
 
-Can Gulp do this? Yes. But the gulp package ecosystem is terrible,
-debugging is unpleasant, and I still have no idea what a `stream` is.
-
 Built in Python 3.
+
+### Should I use this in production?
+
+I have no idea. I did it for fun, and to scratch my own itch.
+
+### Can't Gulp do this?
+
+It can. My goal here is to make an API and toolkit that I like using.
+And of course, to work in Python, which is really good at doing stuff to files.
 
 ## Usage
 
@@ -211,12 +217,7 @@ a fancy wrapper, I just needed something to run them when stuff changed.
 
 And I just like working in Python.
 
-### Should I use this in production?
-
-I have no idea. I did it for fun, and to scratch my own itch.
-
 ### TODO
 
 - [ ] It'd be neat if it was smart enough to only rebuild the files you
 touched, but that's really hard.
-- [ ] Github pages deployment should be trivial and obvious.
