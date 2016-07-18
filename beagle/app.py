@@ -49,7 +49,6 @@ class App(object):
                 'markdown.extensions.footnotes',
                 'markdown.extensions.toc',
                 'markdown.extensions.tables',
-                'markdown.extensions.codehilite',
                 'markdown.extensions.sane_lists',
                 'markdown.extensions.smarty',
                 'markdown.extensions.smart_strong',

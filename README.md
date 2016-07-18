@@ -110,6 +110,24 @@ If `watch` is true, every time you modify a file in the source
 directory, include the index, the dist will rebuild.
 
 
+### Markdown
+
+When rendering Jinja2 templates, you can use the Markdown
+filter. Almost all the extensions are enabled.
+
+```jinja2
+{{ title|markdown }}
+
+{% filter markdown %}
+# Markdown is pretty great
+
+You can use less popular features like footnotes[^1].
+
+[^1]: Tables, smartquotes, code fencing, table of contents, and metadata should work too.
+{% endfilter %}
+```
+
+
 ### Extensibility
 
 Subclass `beagle.commands.Command` to make new commands.
@@ -143,6 +161,9 @@ def browserify():
 Because everything here is just Python, there's no reason you can't make, for example,
 database calls in your index or custom commands.
 
+You can also pass a custom Jinja2 environment to the Beagle app constructor if you'd
+like to use custom filters/etc using the kwarg `jinja_env`.
+
 ## Deployment
 
 Point nginx at your `dist` folder.
@@ -162,15 +183,11 @@ a fancy wrapper, I just needed something to run them when stuff changed.
 
 And I just like working in Python.
 
-
 ### Should I use this in production?
 
 I have no idea. I did it for fun, and to scratch my own itch.
 
 ### TODO
-
-Jinja2 settings need to be configurable per project, I think. Or
-at the very least markdown needs to be built in.
 
 It'd be neat if it was smart enough to only rebuild the files you
 touched, but that's really hard.
