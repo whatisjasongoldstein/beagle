@@ -199,6 +199,6 @@ I have no idea. I did it for fun, and to scratch my own itch.
 
 ### TODO
 
--[ ] It'd be neat if it was smart enough to only rebuild the files you
+- [ ] It'd be neat if it was smart enough to only rebuild the files you
 touched, but that's really hard.
--[ ] Github pages deployment should be trivial and obvious.
+- [ ] Github pages deployment should be trivial and obvious.
