@@ -5,9 +5,10 @@ import sys
 import time
 import logging
 import importlib
+import jinja2
+import markdown
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler
-from jinja2 import Environment, FileSystemLoader
 
 
 Notifier = None
@@ -19,20 +20,30 @@ except ImportError:
 
 class App(object):
 
-    def __init__(self, index, src=None, dist=None, watch=False):
+    def __init__(self, index, src=None, dist=None, watch=False, jinja_env=None):
         self.index = index
         self.src = src
         self.dist = dist
 
-        # Set flask to serve from the right directory
-        # if server:
-        #     server.static_folder = self.dist
 
-        self.jinja = Environment(loader=FileSystemLoader(self.src))
+        # Allow passing a custom jinja2 env
+        if jinja_env:
+            self.jinja = jinja_env
+        else:
+            self.setup_jinja2()
 
         self.render()
         if watch:
             self.watch()
+
+    def setup_jinja2(self):
+        self.jinja = jinja2.Environment(loader=jinja2.FileSystemLoader(self.src))
+        self.jinja.trim_blocks = True
+        self.jinja.lstrip_blocks = True
+
+        if markdown:
+            md = markdown.Markdown(extensions=['meta'])
+            self.jinja.filters['markdown'] = lambda text: jinja2.Markup(md.convert(text))
 
     def do_action(self, action):
         assets = action()
@@ -48,8 +59,10 @@ class App(object):
 
     def render(self):
     
-        # Cleanup dist and ensure folders exist
-        shutil.rmtree(self.dist)
+        # Cleanup dist and ensure folders exist if --clean
+        if "--clean" in sys.argv:
+            shutil.rmtree(self.dist)
+
         required_folders = (
             self.dist,
             os.path.join(self.dist, "css"),
