@@ -42,9 +42,19 @@ class App(object):
         self.jinja.trim_blocks = True
         self.jinja.lstrip_blocks = True
 
-        if markdown:
-            md = markdown.Markdown(extensions=['meta'])
-            self.jinja.filters['markdown'] = lambda text: jinja2.Markup(md.convert(text))
+        md = markdown.Markdown(output_format="html5",
+            extensions=[
+                'markdown.extensions.meta',
+                'markdown.extensions.fenced_code',
+                'markdown.extensions.footnotes',
+                'markdown.extensions.toc',
+                'markdown.extensions.tables',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.sane_lists',
+                'markdown.extensions.smarty',
+                'markdown.extensions.smart_strong',
+                ])
+        self.jinja.filters['markdown'] = lambda text: jinja2.Markup(md.convert(text))
 
     def do_action(self, action):
         assets = action()
