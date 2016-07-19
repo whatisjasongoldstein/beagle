@@ -103,13 +103,13 @@ class App(object):
                 os.remove(filepath)
 
     def render(self):
+
+        if not os.path.exists(self.dist):
+            os.mkdir(self.dist)
     
         # Cleanup dist and ensure folders exist if --clean
         if "--clean" in sys.argv:
             self.clean()
-
-        if not os.path.exists(self.dist):
-            os.mkdir(self.dist)
 
         importlib.reload(self.index)
 
@@ -171,10 +171,9 @@ class App(object):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s - %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        event_handler = RenderOnChangeHandler()
-        observer = Observer()
 
-        observer.schedule(event_handler, self.src, recursive=True)
+        observer = Observer()
+        observer.schedule(RenderOnChangeHandler(), self.src, recursive=True)
         observer.start()
         try:
             # Run Simple python server
