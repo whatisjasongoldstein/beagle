@@ -1,3 +1,4 @@
+import gc
 import shutil
 import json
 import os
@@ -59,6 +60,7 @@ class App(object):
         self.jinja = jinja2.Environment(loader=jinja2.FileSystemLoader(self.src))
         self.jinja.trim_blocks = True
         self.jinja.lstrip_blocks = True
+        self.jinja.auto_reload = True
 
         md = markdown.Markdown(output_format="html5",
             extensions=[
@@ -82,8 +84,6 @@ class App(object):
 
         for asset in assets:
             asset.set_app(self)
-            asset.render()
-
 
     def clean(self):
         """
@@ -166,6 +166,11 @@ class App(object):
             """
             def on_modified(self, *args, **kwargs):
                 render()
+                # Loading templates and classes over and over
+                # causes gradual memory usage to creep up.
+                # The garbage collector should fire every
+                # after automatic renders to prevent this.
+                gc.collect()
         
         # Setup observer
         logging.basicConfig(level=logging.INFO,
@@ -175,6 +180,7 @@ class App(object):
         observer = Observer()
         observer.schedule(RenderOnChangeHandler(), self.src, recursive=True)
         observer.start()
+
         try:
             # Run Simple python server
             server.run()
