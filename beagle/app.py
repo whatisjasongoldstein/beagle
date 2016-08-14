@@ -131,8 +131,6 @@ class App(object):
 
     def watch(self):
         
-        server = None
-
         # Setup Flask app, which will be our dev server
         from flask import Flask
 
