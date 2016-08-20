@@ -84,6 +84,7 @@ class App(object):
 
         for asset in assets:
             asset.set_app(self)
+            asset.render()
 
     def clean(self):
         """
