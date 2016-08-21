@@ -168,8 +168,39 @@ def browserify():
 Because everything here is just Python, there's no reason you can't make, for example,
 database calls in your index or custom commands.
 
-You can also pass a custom Jinja2 environment to the Beagle app constructor if you'd
-like to use custom filters/etc using the kwarg `jinja_env`.
+
+## Custom Jinja2 Environment
+
+If you don't like the default jinja2 environment, you can override it by
+subclassing the app. Here's an example that adds a date format filter.
+
+```python
+#!/usr/bin/env python
+
+import os
+import sys
+import beagle
+
+from src import index
+
+def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
+    return value.strftime(format)
+
+
+class BetterApp(beagle.App):
+
+    def setup_jinja2(self):
+        env = super(BetterApp, self).setup_jinja2()
+        env.filters['datetimeformat'] = datetimeformat
+        return env
+
+
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(PROJECT_DIR, "src")
+DIST_DIR = os.path.join(PROJECT_DIR, "dist")
+
+app = BetterApp(index, src=SRC_DIR, dist=DIST_DIR, watch="dev" in sys.argv)
+```
 
 ## Deployment
 
@@ -216,3 +247,6 @@ I have no idea. I did it for fun, and to scratch my own itch.
 
 - [ ] It'd be neat if it was smart enough to only rebuild the files you
 touched, but that's really hard.
+- [ ] The Jinja2 environment is recreated between builds because constantly adding
+  new templates causes its memory overhead to grow infinitely over time. If
+  anyone knows a more elegant way to fix this, please get in touch.

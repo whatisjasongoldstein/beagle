@@ -31,14 +31,12 @@ class App(object):
       - Absolute path to the site's build directory
     watch
       - Boolean. Should we start a Flask server and autobuild for development?
-    jinja_env
-      - Custom jinja2 environment for... special cases I haven't thought of?
     url_prefix
       - Used when the site will live under a path, such as mysite.com/foo/ instead
         of simply mysite.com. This is meant to help work on github pages, and
         will make the development server behave as expected.
     """
-    def __init__(self, index, src=None, dist=None, watch=False, jinja_env=None, url_prefix="/"):
+    def __init__(self, index, src=None, dist=None, watch=False, url_prefix="/"):
         self.index = index
         self.src = src
         self.dist = dist
@@ -46,36 +44,9 @@ class App(object):
         # Set url prefix for developing github pages
         self.url_prefix = url_prefix
 
-        # Allow passing a custom jinja2 env
-        if jinja_env:
-            self.jinja = jinja_env
-        else:
-            self.setup_jinja2()
-
         self.render()
         if watch:
             self.watch()
-
-    def setup_jinja2(self):
-        self.jinja = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(self.src),
-            cache_size=0)
-        self.jinja.trim_blocks = True
-        self.jinja.lstrip_blocks = True
-        self.jinja.auto_reload = True
-
-        md = markdown.Markdown(output_format="html5",
-            extensions=[
-                'markdown.extensions.meta',
-                'markdown.extensions.fenced_code',
-                'markdown.extensions.footnotes',
-                'markdown.extensions.toc',
-                'markdown.extensions.tables',
-                'markdown.extensions.sane_lists',
-                'markdown.extensions.smarty',
-                'markdown.extensions.smart_strong',
-                ])
-        self.jinja.filters['markdown'] = lambda text: jinja2.Markup(md.convert(text))
 
     def do_action(self, action):
         assets = action()
@@ -116,6 +87,11 @@ class App(object):
 
         importlib.reload(self.index)
 
+        # Create a new jinja2 each time to prevent memory
+        # from expanding. It really wasn't meant to be 
+        # used this way.
+        self.jinja = self.setup_jinja2()
+
         keys = dir(self.index)
         for key in keys:
             if key.startswith("__"):
@@ -125,6 +101,36 @@ class App(object):
                 self.do_action(attr)
 
         self.notify("Built your code! 🐶")
+
+    def setup_jinja2(self):
+        """
+        Create jinja2 environment. If we've been passed
+        a custom method for this, use that.
+
+        To use custom filters, subclass the app object
+        and override this method.
+        """
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(self.src),
+            cache_size=0,
+            auto_reload=True,
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+
+        md = markdown.Markdown(output_format="html5",
+            extensions=[
+                'markdown.extensions.meta',
+                'markdown.extensions.fenced_code',
+                'markdown.extensions.footnotes',
+                'markdown.extensions.toc',
+                'markdown.extensions.tables',
+                'markdown.extensions.sane_lists',
+                'markdown.extensions.smarty',
+                'markdown.extensions.smart_strong',
+                ])
+        env.filters['markdown'] = lambda text: jinja2.Markup(md.convert(text))
+        return env
 
     def notify(self, message):
         if Notifier:
