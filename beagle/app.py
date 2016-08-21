@@ -57,7 +57,9 @@ class App(object):
             self.watch()
 
     def setup_jinja2(self):
-        self.jinja = jinja2.Environment(loader=jinja2.FileSystemLoader(self.src))
+        self.jinja = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(self.src),
+            cache_size=0)
         self.jinja.trim_blocks = True
         self.jinja.lstrip_blocks = True
         self.jinja.auto_reload = True
@@ -157,14 +159,16 @@ class App(object):
                 # be an html file.
                 return server.send_static_file("%s.html" % path)
 
-        render = self.render
+
+        # Assign self to closure variable
+        parent = self
 
         class RenderOnChangeHandler(FileSystemEventHandler):
             """
             Restart and when anything in src changes.
             """
             def on_modified(self, *args, **kwargs):
-                render()
+                parent.render()
                 # Loading templates and classes over and over
                 # causes gradual memory usage to creep up.
                 # The garbage collector should fire every
