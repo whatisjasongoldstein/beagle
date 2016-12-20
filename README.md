@@ -7,6 +7,10 @@ asset processing.
 
 Built in Python 3.
 
+### Should I use this in production?
+
+I do, but you probably shouldn't. I did this to experiment and scratch my own itch. PR's accepted, but I make no promises about maintenance etc.
+
 ## Usage
 
 `pip install git+git@github.com:whatisjasongoldstein/beagle.git@master#egg=beagle`
@@ -238,10 +242,6 @@ work to build a gulp static site had command lines. They don't need
 a fancy wrapper, I just needed something to run them when stuff changed.
 
 And I just like working in Python.
-
-### Should I use this in production?
-
-I have no idea. I did it for fun, and to scratch my own itch.
 
 ### TODO
 
