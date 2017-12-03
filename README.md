@@ -9,7 +9,7 @@ Built in Python 3.
 
 ### Should I use this in production?
 
-I do, but you probably shouldn't. I did this to experiment and scratch my own itch. PR's accepted, but I make no promises about maintenance etc.
+No! This is an experimental toy project. I don't maintain it.
 
 ## Usage
 
@@ -248,5 +248,4 @@ And I just like working in Python.
 - [ ] It'd be neat if it was smart enough to only rebuild the files you
 touched, but that's really hard.
 - [ ] The Jinja2 environment is recreated between builds because constantly adding
-  new templates causes its memory overhead to grow infinitely over time. If
-  anyone knows a more elegant way to fix this, please get in touch.
+  new templates causes its memory overhead to grow infinitely over time.
